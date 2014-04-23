@@ -153,6 +153,47 @@ svg.append("g")
   .style("text-anchor", "end")
   .text("Coeff");
 
+function linearRegression(y,x){
+    var lr = {};
+    var n = y.length;
+    var sum_x = 0;
+    var sum_y = 0;
+    var sum_xy = 0;
+    var sum_xx = 0;
+    var sum_yy = 0;
+
+    for (var i = 0; i < y.length; i++) {
+        sum_x += x[i];
+        sum_y += y[i];
+        sum_xy += (x[i]*y[i]);
+        sum_xx += (x[i]*x[i]);
+        sum_yy += (y[i]*y[i]);
+    }
+
+    lr['slope'] = (n * sum_xy - sum_x * sum_y) / (n*sum_xx - sum_x * sum_x);
+    lr['intercept'] = (sum_y - lr.slope * sum_x)/n;
+    lr['r2'] = Math.pow((n*sum_xy - sum_x*sum_y)/Math.sqrt((n*sum_xx-sum_x*sum_x)*(n*sum_yy-sum_y*sum_y)),2);
+
+    return lr;
+}
+
+var lr = linearRegression(yData, xData);
+
+
+
+var yval = data.map(yMap);
+var xval = data.map(xMap);
+var max = d3.max(data, function(d) { return d.coeff;});
+var min = d3.min(data, function(d) { return d.coeff;});
+
+var myLine = svg.append("svg:line")
+    .attr("x1", xScale(min))
+    .attr("y1", yScale(lr.intercept))
+    .attr("x2", xScale(max))
+    .attr("y2", yScale((max * lr.slope) + lr.intercept ))
+    .style("stroke", "rgb(29,107,161)")
+    .attr('stroke-width', 4);
+
 // y-axis
 svg.append("g")
   .attr("class", "y axis")
@@ -173,13 +214,12 @@ svg.selectAll(".dot")
   .attr("r", 3.5)
   .attr("cx", xMap)
   .attr("cy", yMap)
-  .style("fill", function(d) { return color(cValue(d));}) 
+  .style("fill", function(d) { return color(cValue(d));})
   .on("mouseover", function(d) {
       tooltip.transition()
            .duration(200)
-           .style("opacity", .9);
-      tooltip.html(d.name + "<br/> (" + xValue(d) 
-        + ", " + yValue(d) + ")")
+           .style("opacity", 0.9);
+      tooltip.html(d.name + "<br/> (" + xValue(d) + ", " + yValue(d) + ")")
            .style("left", (d3.event.pageX + 5) + "px")
            .style("top", (d3.event.pageY - 28) + "px");
   })
@@ -188,18 +228,3 @@ svg.selectAll(".dot")
            .duration(500)
            .style("opacity", 0);
   });
-
-// draw legend colored rectangles
-legend.append("rect")
-  .attr("x", width - 18)
-  .attr("width", 18)
-  .attr("height", 18)
-  .style("fill", color);
-
-// draw legend text
-legend.append("text")
-  .attr("x", width - 24)
-  .attr("y", 9)
-  .attr("dy", ".35em")
-  .style("text-anchor", "end")
-  .text(function(d) { return d;});
