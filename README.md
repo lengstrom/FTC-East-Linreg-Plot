@@ -1,4 +1,4 @@
 FTC-East-Linreg-Plot
 ====================
 
-Linreg plot using d3.js
+Linreg plot of qp vs calculated coefficients using d3.js
